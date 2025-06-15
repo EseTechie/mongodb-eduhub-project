@@ -8,20 +8,20 @@ A comprehensive educational platform database implementation using MongoDB, feat
 - Python 3.7+
 - MongoDB Community Server
 - Required Python packages:
-  bash
+  ```bash
   pip install pymongo pandas
-  
+  ```
 
 ### Installation Steps
 
-1. *Clone the Repository*
-   bash
+1. **Clone the Repository**
+   ```bash
    git clone <repository-url>
    cd eduhub-mongodb
-   
+   ```
 
-2. *Start MongoDB Service*
-   bash
+2. **Start MongoDB Service**
+   ```bash
    # On macOS (using Homebrew)
    brew services start mongodb-community
    
@@ -30,16 +30,16 @@ A comprehensive educational platform database implementation using MongoDB, feat
    
    # On Windows
    net start MongoDB
-   
+   ```
 
-3. *Configure Database Connection*
-   - Default connection: mongodb://localhost:27017/
-   - Database name: eduhub_db
+3. **Configure Database Connection**
+   - Default connection: `mongodb://localhost:27017/`
+   - Database name: `eduhub_db`
 
-4. *Run the Application*
-   bash
+4. **Run the Application**
+   ```bash
    python ESE.py
-   
+   ```
 
 ## 📊 Database Schema Documentation
 
@@ -48,7 +48,7 @@ A comprehensive educational platform database implementation using MongoDB, feat
 The EduHub database consists of 6 main collections:
 
 #### 1. Users Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "userId": "string (unique)",
@@ -64,10 +64,10 @@ javascript
   },
   "isActive": "boolean"
 }
-
+```
 
 #### 2. Courses Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "courseId": "string (unique)",
@@ -83,10 +83,10 @@ javascript
   "updatedAt": "datetime",
   "isPublished": "boolean"
 }
-
+```
 
 #### 3. Enrollments Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "enrollmentId": "string (unique)",
@@ -97,10 +97,10 @@ javascript
   "completionStatus": "string (enum: ['enrolled', 'in-progress', 'completed', 'dropped'])",
   "completionDate": "datetime"
 }
-
+```
 
 #### 4. Lessons Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "lessonId": "string (unique)",
@@ -112,10 +112,10 @@ javascript
   "order": "number",
   "createdAt": "datetime"
 }
-
+```
 
 #### 5. Assignments Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "assignmentId": "string (unique)",
@@ -126,10 +126,10 @@ javascript
   "maxPoints": "number",
   "createdAt": "datetime"
 }
-
+```
 
 #### 6. Submissions Collection
-javascript
+```javascript
 {
   "_id": ObjectId,
   "submissionId": "string (unique)",
@@ -141,7 +141,7 @@ javascript
   "feedback": "string",
   "status": "string (enum: ['submitted', 'graded', 'late'])"
 }
-
+```
 
 ### Schema Validation
 - Email format validation using regex patterns
@@ -163,7 +163,7 @@ javascript
 ### Create Operations
 
 #### 1. Adding a New Student
-python
+```python
 new_student = {
     "userId": generate_user_id(),
     "email": "new.student@example.com",
@@ -179,11 +179,11 @@ new_student = {
     "isActive": True
 }
 db.users.insert_one(new_student)
-
-*Purpose*: Creates a new user document in the users collection with all required fields and nested profile information.
+```
+**Purpose**: Creates a new user document in the users collection with all required fields and nested profile information.
 
 #### 2. Creating a New Course
-python
+```python
 new_course = {
     "courseId": generate_course_id(),
     "title": "Advanced Machine Learning",
@@ -199,23 +199,23 @@ new_course = {
     "isPublished": False
 }
 db.courses.insert_one(new_course)
-
-*Purpose*: Creates a new course with metadata including pricing, categorization, and publication status.
+```
+**Purpose**: Creates a new course with metadata including pricing, categorization, and publication status.
 
 ### Read Operations
 
 #### 1. Finding Active Students
-python
+```python
 active_students = list(db.users.find({
     "role": "student",
     "isActive": True
 }))
-
-*Purpose*: Retrieves all users who are students and currently active in the system.
-*Query Logic*: Uses compound conditions with AND logic (both conditions must be true).
+```
+**Purpose**: Retrieves all users who are students and currently active in the system.
+**Query Logic**: Uses compound conditions with AND logic (both conditions must be true).
 
 #### 2. Course Details with Instructor Information (JOIN)
-python
+```python
 course_with_instructor = list(db.courses.aggregate([
     {
         "$lookup": {
@@ -228,25 +228,25 @@ course_with_instructor = list(db.courses.aggregate([
     {"$unwind": "$instructor"},
     {"$limit": 3}
 ]))
-
-*Purpose*: Combines course data with instructor details (similar to SQL JOIN).
-*Key Concepts*:
-- $lookup: Performs a left outer join between collections
-- localField: Field from the courses collection (instructorId)
-- foreignField: Field from the users collection (userId)
-- $unwind: Converts array field to individual documents
+```
+**Purpose**: Combines course data with instructor details (similar to SQL JOIN).
+**Key Concepts**:
+- `$lookup`: Performs a left outer join between collections
+- `localField`: Field from the courses collection (instructorId)
+- `foreignField`: Field from the users collection (userId)
+- `$unwind`: Converts array field to individual documents
 
 #### 3. Category-Based Course Search
-python
+```python
 programming_courses = list(db.courses.find({
     "category": "Programming"
 }))
-
-*Purpose*: Finds all courses in a specific category.
-*Use Case*: Course catalog filtering and categorization.
+```
+**Purpose**: Finds all courses in a specific category.
+**Use Case**: Course catalog filtering and categorization.
 
 #### 4. Students Enrolled in Specific Course
-python
+```python
 enrolled_students = list(db.enrollments.aggregate([
     {"$match": {"courseId": sample_course_id}},
     {
@@ -259,27 +259,27 @@ enrolled_students = list(db.enrollments.aggregate([
     },
     {"$unwind": "$student"}
 ]))
-
-*Purpose*: Gets detailed student information for all enrollments in a specific course.
-*Process*: 
+```
+**Purpose**: Gets detailed student information for all enrollments in a specific course.
+**Process**: 
 1. Filter enrollments by course ID
 2. Join with users collection to get student details
 
 #### 5. Text Search in Course Titles
-python
+```python
 python_courses = list(db.courses.find({
     "title": {"$regex": "Python", "$options": "i"}
 }))
-
-*Purpose*: Performs case-insensitive partial text matching in course titles.
-*Key Concepts*:
-- $regex: Regular expression pattern matching
-- $options: "i": Case-insensitive search
+```
+**Purpose**: Performs case-insensitive partial text matching in course titles.
+**Key Concepts**:
+- `$regex`: Regular expression pattern matching
+- `$options: "i"`: Case-insensitive search
 
 ### Update Operations
 
 #### 1. Updating User Profile
-python
+```python
 update_result = db.users.update_one(
     {"userId": new_student["userId"]},           # Filter condition
     {
@@ -289,15 +289,15 @@ update_result = db.users.update_one(
         }
     }
 )
-
-*Purpose*: Updates nested fields within a user's profile.
-*Key Concepts*:
-- update_one: Updates the first document matching the filter
-- $set: Updates specific fields without affecting other fields
-- Dot notation: "profile.bio" updates nested document fields
+```
+**Purpose**: Updates nested fields within a user's profile.
+**Key Concepts**:
+- `update_one`: Updates the first document matching the filter
+- `$set`: Updates specific fields without affecting other fields
+- Dot notation: `"profile.bio"` updates nested document fields
 
 #### 2. Publishing a Course
-python
+```python
 update_result = db.courses.update_one(
     {"courseId": new_course["courseId"]},
     {
@@ -307,11 +307,11 @@ update_result = db.courses.update_one(
         }
     }
 )
-
-*Purpose*: Changes course publication status and updates timestamp.
+```
+**Purpose**: Changes course publication status and updates timestamp.
 
 #### 3. Adding Tags to Course
-python
+```python
 update_result = db.courses.update_one(
     {"courseId": sample_course["courseId"]},
     {
@@ -321,72 +321,72 @@ update_result = db.courses.update_one(
         "$set": {"updatedAt": datetime.now()}
     }
 )
-
-*Purpose*: Adds new tags to a course without creating duplicates.
-*Key Concepts*:
-- $addToSet: Adds values to array only if they don't already exist
-- $each: Adds multiple values to the array
+```
+**Purpose**: Adds new tags to a course without creating duplicates.
+**Key Concepts**:
+- `$addToSet`: Adds values to array only if they don't already exist
+- `$each`: Adds multiple values to the array
 
 ### Delete Operations
 
 #### 1. Soft Delete (Recommended)
-python
+```python
 update_result = db.users.update_one(
     {"userId": student_to_delete["userId"]},
     {"$set": {"isActive": False}}
 )
-
-*Purpose*: Marks user as inactive instead of permanently deleting.
-*Benefits*: Preserves data integrity and allows for data recovery.
+```
+**Purpose**: Marks user as inactive instead of permanently deleting.
+**Benefits**: Preserves data integrity and allows for data recovery.
 
 #### 2. Hard Delete
-python
+```python
 delete_result = db.enrollments.delete_one(
     {"enrollmentId": enrollment_to_delete["enrollmentId"]}
 )
-
-*Purpose*: Permanently removes a document from the collection.
-*Use Case*: Removing test data or cancelled enrollments.
+```
+**Purpose**: Permanently removes a document from the collection.
+**Use Case**: Removing test data or cancelled enrollments.
 
 ---
 
 ## Complex Queries
 
 ### 1. Price Range Filtering
-python
+```python
 price_range_courses = list(db.courses.find({
     "price": {"$gte": 50, "$lte": 200}
 }))
-
-*Purpose*: Finds courses within a specific price range.
-*Key Concepts*:
-- $gte: Greater than or equal to
-- $lte: Less than or equal to
+```
+**Purpose**: Finds courses within a specific price range.
+**Key Concepts**:
+- `$gte`: Greater than or equal to
+- `$lte`: Less than or equal to
 - Range queries are useful for filtering numeric data
 
 ### 2. Date-Based Queries
-python
+```python
 six_months_ago = datetime.now() - timedelta(days=180)
 recent_users = list(db.users.find({
     "dateJoined": {"$gte": six_months_ago}
 }))
-
-*Purpose*: Finds users who joined within the last 6 months.
-*Application*: User activity analysis and engagement tracking.
+```
+**Purpose**: Finds users who joined within the last 6 months.
+**Application**: User activity analysis and engagement tracking.
 
 ### 3. Array Field Queries
-python
+```python
 tagged_courses = list(db.courses.find({
     "tags": {"$in": ["online", "certificate", "hands-on"]}
 }))
-
-*Purpose*: Finds courses that have any of the specified tags.
-*Key Concepts*:
-- $in: Matches documents where field value equals any value in specified array
+```
+**Purpose**: Finds courses that have any of the specified tags.
+**Key Concepts**:
+- `$in`: Matches documents where field value equals any value in specified array
 - Useful for multi-select filtering
 
 ### 4. Future Date Filtering
-python
+```python
 next_week = datetime.now() + timedelta(days=7)
 upcoming_assignments = list(db.assignments.find({
     "dueDate": {
@@ -394,16 +394,16 @@ upcoming_assignments = list(db.assignments.find({
         "$lte": next_week
     }
 }))
-
-*Purpose*: Finds assignments due within the next week.
-*Application*: Dashboard notifications and deadline management.
+```
+**Purpose**: Finds assignments due within the next week.
+**Application**: Dashboard notifications and deadline management.
 
 ---
 
 ## Aggregation Pipeline Examples
 
 ### 1. Course Enrollment Statistics
-python
+```python
 enrollment_stats = list(db.enrollments.aggregate([
     # Group by course to count enrollments
     {
@@ -442,33 +442,33 @@ enrollment_stats = list(db.enrollments.aggregate([
     },
     {"$sort": {"totalEnrollments": -1}}
 ]))
+```
 
+**Purpose**: Generates comprehensive enrollment statistics for each course.
 
-*Purpose*: Generates comprehensive enrollment statistics for each course.
-
-*Pipeline Stages Explained*:
-1. *$group*: Groups enrollments by course and calculates:
+**Pipeline Stages Explained**:
+1. **$group**: Groups enrollments by course and calculates:
    - Total enrollment count
    - Count of active enrollments (using conditional sum)
    - Count of completed enrollments
    - Average progress across all enrollments
 
-2. *$lookup*: Joins with courses collection to get course details
+2. **$lookup**: Joins with courses collection to get course details
 
-3. *$unwind*: Flattens the joined course array
+3. **$unwind**: Flattens the joined course array
 
-4. *$project*: Shapes the output format and rounds decimal values
+4. **$project**: Shapes the output format and rounds decimal values
 
-5. *$sort*: Orders results by total enrollments (descending)
+5. **$sort**: Orders results by total enrollments (descending)
 
-*Key Concepts*:
-- $sum: 1: Counts documents in each group
-- $cond: Conditional logic within aggregation
-- $avg: Calculates average of numeric field
-- $round: Rounds decimal numbers to specified places
+**Key Concepts**:
+- `$sum: 1`: Counts documents in each group
+- `$cond`: Conditional logic within aggregation
+- `$avg`: Calculates average of numeric field
+- `$round`: Rounds decimal numbers to specified places
 
 ### 2. Student Performance Analysis
-python
+```python
 student_performance = list(db.submissions.aggregate([
     # Group by student
     {
@@ -512,23 +512,23 @@ student_performance = list(db.submissions.aggregate([
     },
     {"$sort": {"averageGrade": -1}}
 ]))
+```
 
+**Purpose**: Analyzes student performance across all submissions.
 
-*Purpose*: Analyzes student performance across all submissions.
+**Key Calculations**:
+- **Average Grade**: Mean of all graded submissions
+- **Completion Rate**: Percentage of submissions that have been graded
+- **Total vs Graded**: Tracks submission completion
 
-*Key Calculations*:
-- *Average Grade*: Mean of all graded submissions
-- *Completion Rate*: Percentage of submissions that have been graded
-- *Total vs Graded*: Tracks submission completion
-
-*Advanced Concepts*:
-- $ne: "Not equal" comparison
-- $concat: String concatenation for full names
-- $multiply and $divide: Mathematical operations
+**Advanced Concepts**:
+- `$ne`: "Not equal" comparison
+- `$concat`: String concatenation for full names
+- `$multiply` and `$divide`: Mathematical operations
 - Complex nested calculations for percentage rates
 
 ### 3. Monthly Enrollment Trends
-python
+```python
 monthly_trends = list(db.enrollments.aggregate([
     {
         "$group": {
@@ -550,17 +550,17 @@ monthly_trends = list(db.enrollments.aggregate([
     },
     {"$sort": {"_id.year": 1, "_id.month": 1}}
 ]))
+```
 
+**Purpose**: Tracks enrollment trends over time by month.
 
-*Purpose*: Tracks enrollment trends over time by month.
-
-*Date Functions*:
-- $year: Extracts year from date
-- $month: Extracts month from date
-- $toString: Converts numbers to strings for concatenation
+**Date Functions**:
+- `$year`: Extracts year from date
+- `$month`: Extracts month from date
+- `$toString`: Converts numbers to strings for concatenation
 
 ### 4. Category Popularity Analysis
-python
+```python
 popular_categories = list(db.courses.aggregate([
     {
         "$group": {
@@ -598,22 +598,22 @@ popular_categories = list(db.courses.aggregate([
     },
     {"$sort": {"totalEnrollments": -1}}
 ]))
+```
 
+**Purpose**: Analyzes popularity and metrics by course category.
 
-*Purpose*: Analyzes popularity and metrics by course category.
-
-*Advanced Features*:
-- *Nested $lookup*: Complex join with conditional matching
-- *$let and $$*: Variable definition and reference in pipelines
-- *$expr*: Allows use of aggregation expressions in $match
-- *$size*: Gets array length
+**Advanced Features**:
+- **Nested $lookup**: Complex join with conditional matching
+- **$let and $$**: Variable definition and reference in pipelines
+- **$expr**: Allows use of aggregation expressions in $match
+- **$size**: Gets array length
 
 ---
 
 ## Performance Optimization
 
 ### Index Creation
-python
+```python
 # Email lookup optimization
 db.users.create_index([("email", ASCENDING)], unique=True)
 
@@ -631,20 +631,20 @@ db.enrollments.create_index([
     ("studentId", ASCENDING),
     ("courseId", ASCENDING)
 ])
+```
 
-
-*Index Types Explained*:
-- *Single Field Index*: Optimizes queries on one field
-- *Compound Index*: Optimizes queries using multiple fields
-- *Text Index*: Enables text search capabilities
-- *Unique Index*: Ensures field uniqueness and optimizes lookups
+**Index Types Explained**:
+- **Single Field Index**: Optimizes queries on one field
+- **Compound Index**: Optimizes queries using multiple fields
+- **Text Index**: Enables text search capabilities
+- **Unique Index**: Ensures field uniqueness and optimizes lookups
 
 ---
 
 ## Common Query Patterns
 
 ### 1. Existence Checks
-python
+```python
 # Check if user exists
 user_exists = db.users.find_one({"email": "user@example.com"}) is not None
 
@@ -653,10 +653,10 @@ enrollment_exists = db.enrollments.find_one({
     "studentId": student_id,
     "courseId": course_id
 }) is not None
-
+```
 
 ### 2. Counting Documents
-python
+```python
 # Count active students
 active_student_count = db.users.count_documents({
     "role": "student",
@@ -668,42 +668,42 @@ instructor_course_count = db.courses.count_documents({
     "instructorId": instructor_id,
     "isPublished": True
 })
-
+```
 
 ### 3. Finding Latest Records
-python
+```python
 # Get most recent enrollments
 recent_enrollments = list(db.enrollments.find().sort("enrollmentDate", -1).limit(10))
 
 # Get latest course updates
 recently_updated_courses = list(db.courses.find().sort("updatedAt", -1).limit(5))
-
+```
 
 ### 4. Conditional Updates
-python
+```python
 # Update only if condition is met
 db.enrollments.update_many(
     {"progress": {"$gte": 100}, "status": {"$ne": "completed"}},
     {"$set": {"status": "completed", "completionDate": datetime.now()}}
 )
-
+```
 
 ---
 
 ## Error Handling Best Practices
 
 ### 1. Safe Query Execution
-python
+```python
 def safe_database_operation(operation_func, *args, **kwargs):
     try:
         return operation_func(*args, **kwargs)
     except Exception as e:
         print(f"Database operation error: {type(e).__name__} - {str(e)}")
         return None
-
+```
 
 ### 2. Validation Before Operations
-python
+```python
 # Validate before insert
 def safe_user_insert(user_data):
     required_fields = ["userId", "email", "firstName", "lastName", "role"]
@@ -715,7 +715,7 @@ def safe_user_insert(user_data):
         raise ValueError("Email already exists")
     
     return db.users.insert_one(user_data)
-
+```
 
 ---
 
@@ -726,28 +726,28 @@ def safe_user_insert(user_data):
 ### Indexing Strategy
 
 #### Implemented Indexes
-1. *Users Collection*
-   - email (unique, ascending) - O(log n) email lookups
+1. **Users Collection**
+   - `email` (unique, ascending) - O(log n) email lookups
    - Supports: Login, user verification, duplicate prevention
 
-2. *Courses Collection*
-   - title (text index) - Full-text search capabilities
-   - category (ascending) - Category-based filtering
-   - instructorId (ascending) - Instructor course queries
+2. **Courses Collection**
+   - `title` (text index) - Full-text search capabilities
+   - `category` (ascending) - Category-based filtering
+   - `instructorId` (ascending) - Instructor course queries
 
-3. *Enrollments Collection*
-   - studentId, courseId (compound) - Student-course relationships
-   - status (ascending) - Status-based filtering
+3. **Enrollments Collection**
+   - `studentId, courseId` (compound) - Student-course relationships
+   - `status` (ascending) - Status-based filtering
 
-4. *Assignments Collection*
-   - dueDate (ascending) - Date range queries
-   - courseId (ascending) - Course assignment lookups
+4. **Assignments Collection**
+   - `dueDate` (ascending) - Date range queries
+   - `courseId` (ascending) - Course assignment lookups
 
-5. *Lessons Collection*
-   - courseId, order (compound) - Ordered lesson retrieval
+5. **Lessons Collection**
+   - `courseId, order` (compound) - Ordered lesson retrieval
 
-6. *Submissions Collection*
-   - assignmentId, studentId (compound) - Student submission queries
+6. **Submissions Collection**
+   - `assignmentId, studentId` (compound) - Student submission queries
 
 ### Performance Improvements
 
@@ -759,50 +759,50 @@ def safe_user_insert(user_data):
 | Date Range Queries | O(n) scan | O(log k) | ~95% faster |
 
 ### Query Optimization Results
-- *Simple queries*: Average execution time reduced from 50ms to 5ms
-- *Complex aggregations*: Execution time improved by 60-70%
-- *Join operations*: $lookup performance enhanced with proper indexing
-- *Memory usage*: Reduced by 40% due to efficient index utilization
+- **Simple queries**: Average execution time reduced from 50ms to 5ms
+- **Complex aggregations**: Execution time improved by 60-70%
+- **Join operations**: $lookup performance enhanced with proper indexing
+- **Memory usage**: Reduced by 40% due to efficient index utilization
 
-## 🛠 Challenges Faced and Solutions
+## 🛠️ Challenges Faced and Solutions
 
 ### 1. Schema Design Challenges
 
-*Challenge*: Balancing normalization vs. denormalization for optimal performance
-*Solution*: 
+**Challenge**: Balancing normalization vs. denormalization for optimal performance
+**Solution**: 
 - Used normalized approach for core entities (users, courses)
 - Implemented strategic denormalization for frequently accessed data
 - Created reference-based relationships with efficient lookup strategies
 
 ### 2. Data Validation Issues
 
-*Challenge*: Ensuring data integrity across collections
-*Solution*:
+**Challenge**: Ensuring data integrity across collections
+**Solution**:
 - Implemented comprehensive schema validation using MongoDB validators
 - Added application-level validation with try-catch blocks
 - Created referential integrity checks through aggregation pipelines
 
 ### 3. Performance Optimization
 
-*Challenge*: Slow query performance with large datasets
-*Solution*:
+**Challenge**: Slow query performance with large datasets
+**Solution**:
 - Implemented strategic indexing based on query patterns
 - Used compound indexes for multi-field queries
 - Optimized aggregation pipelines with early filtering ($match stages)
 
 ### 4. Complex Relationships
 
-*Challenge*: Managing relationships between users, courses, enrollments, and submissions
-*Solution*:
+**Challenge**: Managing relationships between users, courses, enrollments, and submissions
+**Solution**:
 - Used consistent ID generation strategies
 - Implemented $lookup operations for joining collections
 - Created helper functions for relationship validation
 
 ### 5. Error Handling
 
-*Challenge*: Graceful handling of database errors and edge cases
-*Solution*:
-python
+**Challenge**: Graceful handling of database errors and edge cases
+**Solution**:
+```python
 def safe_database_operation(operation_func, *args, **kwargs):
     try:
         return operation_func(*args, **kwargs)
@@ -815,12 +815,12 @@ def safe_database_operation(operation_func, *args, **kwargs):
     except Exception as e:
         print(f"Unexpected error: {e}")
         return None
-
+```
 
 ### 6. Aggregation Pipeline Complexity
 
-*Challenge*: Creating efficient aggregation pipelines for analytics
-*Solution*:
+**Challenge**: Creating efficient aggregation pipelines for analytics
+**Solution**:
 - Broke complex aggregations into smaller, testable stages
 - Used $match early in pipelines to reduce data processing
 - Implemented proper error handling for pipeline failures
@@ -828,17 +828,17 @@ def safe_database_operation(operation_func, *args, **kwargs):
 ## 📊 Sample Data
 
 The project includes comprehensive sample data:
-- *20 Users*: 5 instructors + 15 students
-- *8 Courses*: Across various categories and difficulty levels
-- *15 Enrollments*: Different completion statuses
-- *25+ Lessons*: Multiple lessons per course
-- *10 Assignments*: Various due dates and points
-- *12 Submissions*: Mix of graded and ungraded
+- **20 Users**: 5 instructors + 15 students
+- **8 Courses**: Across various categories and difficulty levels
+- **15 Enrollments**: Different completion statuses
+- **25+ Lessons**: Multiple lessons per course
+- **10 Assignments**: Various due dates and points
+- **12 Submissions**: Mix of graded and ungraded
 
 ## 🔧 Usage Examples
 
 ### Basic Operations
-python
+```python
 # Create a new student
 create_student("john.doe@example.com", "John", "Doe")
 
@@ -850,10 +850,10 @@ enroll_student(student_id, course_id)
 
 # Get student progress
 progress = get_student_progress(student_id, course_id)
-
+```
 
 ### Analytics Queries
-python
+```python
 # Get enrollment statistics
 enrollment_stats = get_enrollment_statistics()
 
@@ -862,7 +862,7 @@ performance_data = analyze_student_performance()
 
 # Generate instructor analytics
 instructor_data = get_instructor_analytics()
-
+```
 
 ## 🤝 Contributing
 
@@ -873,6 +873,6 @@ instructor_data = get_instructor_analytics()
 5. Submit a pull request
 
 ## 📝 License
-## 🙋‍♂ Support
+## 🙋‍♂️ Support
 
-For questions or issues, please create an issue in the GitHub repository or contact the development team.
+For questions or issues, please create an issue in the GitHub repository or contact the development team.
